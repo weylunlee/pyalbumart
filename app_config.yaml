@@ -1,0 +1,27 @@
+credentials:
+  username: ''
+  id: ''
+  secret: ''
+  scope: 'user-read-private user-read-playback-state user-modify-playback-state'
+  uri: ''
+
+# assumes display is either horizontal or square
+dimensions:
+#  display_width: 2560
+#  display_height: 1440
+  display_width: 1680
+  display_height: 1050
+
+fonts:
+  font_family: 'Courier New'
+  track: 18
+  artist: 18
+
+colors:
+  track: '#b3ab9f'
+  artist: '#f2af29'
+  background: 'black'
+#  background: '#3b3b3b'
+
+poll_interval: 5
+poll_interval_sleep: 25
