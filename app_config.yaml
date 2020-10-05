@@ -7,15 +7,22 @@ credentials:
 
 # assumes display is either horizontal or square
 dimensions:
+# dell
 #  display_width: 2560
 #  display_height: 1440
+
+# mac book
   display_width: 1680
   display_height: 1050
 
+# raspberry pi
+#  display_width: 640
+#  display_height: 640
+
 fonts:
   font_family: 'Courier New'
-  track: 18
-  artist: 18
+  track: 13
+  artist: 13
 
 colors:
   track: '#b3ab9f'

@@ -74,6 +74,7 @@ def display_art(spotify):
         current_track = get_current_track(spotify)
 
         if current_track is None:
+            current_track_name = None
             tk.update()
             time.sleep(config['poll_interval_sleep'])
             continue
@@ -83,8 +84,8 @@ def display_art(spotify):
 
             track_font = (fonts['font_family'], fonts['track'], 'bold')
             artist_font = (fonts['font_family'], fonts['artist'])
-            track_font_height = font.Font(font=track_font).metrics('linespace')
-            artist_font_height = font.Font(font=artist_font).metrics('linespace')
+            font_height = max(font.Font(font=track_font).metrics('linespace'), font.Font(font=artist_font).metrics('linespace'))
+            photo_height = dims['display_height'] - font_height
 
             # create label for track
             track_label = Label(
@@ -96,8 +97,8 @@ def display_art(spotify):
             )
             track_label.place(
                 x=dims['display_width'] / 2 - dims['display_height'] / 2,
-                y=dims['display_height'],
-                anchor='sw'
+                y=photo_height,
+                anchor='nw'
             )
 
             # create label for artist
@@ -110,23 +111,21 @@ def display_art(spotify):
             )
             artist_label.place(
                 x=dims['display_width'] / 2 + dims['display_height'] / 2,
-                y=dims['display_height'],
-                anchor='se'
+                y=photo_height,
+                anchor='ne'
             )
 
             # create label for album art
-            photo_image = get_photo_image(
-                current_track['album_art_uri'],
-                dims['display_height'],
-                dims['display_height'] -
-                (track_font_height if track_font_height > artist_font_height else artist_font_height) - 1)
+            photo_image = get_photo_image(current_track['album_art_uri'], dims['display_height'], photo_height)
 
             album_art_label = Label(
                 frame,
                 image=photo_image,
                 bd=0
             )
-            album_art_label.place(x=(dims['display_width'] / 2) - (dims['display_height'] / 2), y=0)
+            album_art_label.place(
+                x=(dims['display_width'] / 2) - (dims['display_height'] / 2),
+                y=0)
 
             tk.update()
             track_label.destroy()
