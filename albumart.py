@@ -1,7 +1,7 @@
 import os
 import time
 from io import BytesIO
-from tkinter import Tk, Frame, Label, font
+from tkinter import Tk, Frame, Label, font, Canvas, BOTH
 
 import requests
 import spotipy
@@ -59,29 +59,29 @@ def get_current_track(spotify):
 
 def get_photo_image(src, width, height):
     res = requests.get(src)
-    img = Image.open(BytesIO(res.content)).resize((width, height), Image.ANTIALIAS)
-    photo_image = ImageTk.PhotoImage(img, size=())
-    return photo_image
+    image = Image.open(BytesIO(res.content)).resize((width, height), Image.ANTIALIAS)
+    photo_image = ImageTk.PhotoImage(image, size=())
+    return {
+        'image': image,
+        'photo_image': photo_image
+    }
 
 
-def create_image_label(frame, photo_image, x, y):
-    label = Label(frame, image=photo_image, bd=0)
-    label.place(x=x, y=y)
-    return label
-
-
-def create_text_label(frame, text, bg, fg, text_font, x, y, anchor):
-    label = Label(frame, text=text, bg=bg, fg=fg, font=text_font)
-    label.place(x=x, y=y, anchor=anchor)
-    return label
+def is_color_bright(r, g, b):
+    return (r + g + b) / 3 > 127
 
 
 def display_art(spotify):
-    tk = Tk()
-    tk.configure(bg=colors['background'], cursor='none')
-    tk.attributes('-fullscreen', True)
-    frame = Frame(tk, bg=colors['background'], width=dims['display_width'], height=dims['display_height'])
-    frame.pack()
+    root = Tk()
+    root.configure(bg=colors['background'], cursor='none')
+    root.attributes('-fullscreen', True)
+    canvas = Canvas(root,
+                    width=dims['display_width'],
+                    height=dims['display_height'],
+                    bg=colors['background'],
+                    bd=0,
+                    highlightthickness=0)
+    canvas.pack(fill=BOTH, expand=True)
 
     current_track_name = None
     while True:
@@ -89,76 +89,53 @@ def display_art(spotify):
 
         if current_track is None:
             current_track_name = None
-            tk.update()
+            root.update()
             time.sleep(config['poll_interval_sleep'])
             continue
 
         if current_track['track_name'] != current_track_name:
             current_track_name = current_track['track_name']
 
-            track_font = (fonts['font_family'], fonts['track'], 'bold')
-            artist_font = (fonts['font_family'], fonts['artist'])
-            release_date_font = (fonts['font_family'], fonts['release_date'])
-            track_font_height = font.Font(font=track_font).metrics('linespace')
-            artist_font_height = font.Font(font=artist_font).metrics('linespace')
-            release_date__font_height = font.Font(font=release_date_font).metrics('linespace')
-            photo_height = dims['display_height'] - max(track_font_height + release_date__font_height, artist_font_height)
-
-            # create label for album art
-            photo_image = get_photo_image(
+            # create iamge
+            image_obj = get_photo_image(
                 src=current_track['album_art_uri'],
                 width=dims['display_height'],
-                height=photo_height
+                height=dims['display_height']
             )
+            canvas.create_image((dims['display_width'] / 2) - (dims['display_height'] / 2), 0,
+                                image=image_obj['photo_image'],
+                                anchor='nw')
 
-            album_art_label = create_image_label(
-                frame,
-                photo_image=photo_image,
-                x=(dims['display_width'] / 2) - (dims['display_height'] / 2),
-                y=0
-            )
+            # create text for track
+            r, g, b = image_obj['image'].getpixel((3, dims['display_height'] - 50))
+            canvas.create_text((dims['display_width'] / 2 - dims['display_height'] / 2), dims['display_height'] - 50,
+                               text=current_track_name,
+                               fill=colors['track_dark'] if is_color_bright(r, g, b) else colors['track_light'],
+                               font=(fonts['font_family'], fonts['track'], 'bold'),
+                               angle=90,
+                               anchor='nw'
+                               )
 
-            # create label for track
-            track_label = create_text_label(
-                frame=frame,
-                text=current_track_name,
-                bg=colors['background'],
-                fg=colors['track'],
-                text_font=track_font,
-                x=dims['display_width'] / 2 - dims['display_height'] / 2,
-                y=photo_height,
-                anchor='nw'
-            )
+            # create text for artist
+            r, g, b = image_obj['image'].getpixel((dims['display_height'] - 135, dims['display_height'] - 3))
+            canvas.create_text(dims['display_width'] / 2 + dims['display_height'] / 2 - 135, dims['display_height'],
+                               text=current_track['artist'],
+                               fill=colors['artist_dark'] if is_color_bright(r, g, b) else colors['artist_light'],
+                               font=(fonts['font_family'], fonts['artist'], 'bold'),
+                               anchor='se'
+                               )
 
-            # create label for release date
-            release_date_label = create_text_label(
-                frame=frame,
-                text=current_track['release_date'],
-                bg=colors['background'],
-                fg=colors['release_date'],
-                text_font=release_date_font,
-                x=dims['display_width'] / 2 - dims['display_height'] / 2,
-                y=photo_height + track_font_height,
-                anchor="nw"
-            )
+            # create text for release date
+            r, g, b = image_obj['image'].getpixel((dims['display_height'] - 45, dims['display_height'] - 8))
+            canvas.create_text(dims['display_width'] / 2 + dims['display_height'] / 2 - 45, dims['display_height'],
+                               text=current_track['release_date'],
+                               fill=colors['track_dark'] if is_color_bright(r, g, b) else colors['track_light'],
+                               font=(fonts['font_family'], fonts['release_date']),
+                               anchor='se'
+                               )
 
-            # create label for artist
-            artist_label = create_text_label(
-                frame=frame,
-                text=current_track['artist'],
-                bg=colors['background'],
-                fg=colors['artist'],
-                text_font=artist_font,
-                x=dims['display_width'] / 2 + dims['display_height'] / 2,
-                y=photo_height,
-                anchor='ne'
-            )
-
-            tk.update()
-            track_label.destroy()
-            artist_label.destroy()
-            release_date_label.destroy()
-            album_art_label.destroy()
+            canvas.update()
+            canvas.delete("all")
 
         time.sleep(config['poll_interval'])
 
