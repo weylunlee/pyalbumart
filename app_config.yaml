@@ -12,23 +12,25 @@ dimensions:
 #  display_height: 1440
 
 # mac book
-  display_width: 1680
-  display_height: 1050
+  display_width: 1010
+  display_height: 1010
 
 # raspberry pi
-#  display_width: 640
-#  display_height: 640
+#  display_width: 365
+#  display_height: 365
 
 fonts:
   font_family: 'Courier New'
-  track: 13
-  artist: 13
+  track: 14
+  artist: 14
+  release_date: 13
 
 colors:
-  track: '#b3ab9f'
-  artist: '#f2af29'
+  track_light: '#ede3d3'
+  track_dark: '#45413b'
+  artist_light: '#f7bb43'
+  artist_dark: '#9e6a03'
   background: 'black'
-#  background: '#3b3b3b'
 
 poll_interval: 5
 poll_interval_sleep: 25

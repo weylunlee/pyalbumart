@@ -1,7 +1,7 @@
 import os
 import time
 from io import BytesIO
-from tkinter import Tk, Frame, Label, font, Canvas, BOTH
+from tkinter import Tk, Canvas, BOTH
 
 import requests
 import spotipy
@@ -59,7 +59,7 @@ def get_current_track(spotify):
 
 def get_photo_image(src, width, height):
     res = requests.get(src)
-    image = Image.open(BytesIO(res.content)).resize((width, height), Image.ANTIALIAS)
+    image = Image.open(BytesIO(res.content)).resize((width, height), Image.ANTIALIAS).convert('RGB')
     photo_image = ImageTk.PhotoImage(image, size=())
     return {
         'image': image,
