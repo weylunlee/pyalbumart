@@ -67,8 +67,12 @@ def get_photo_image(src, width, height):
     }
 
 
-def is_color_bright(r, g, b):
-    return (r + g + b) / 3 > 127
+def is_color_bright(image_obj, x, y):
+    try:
+        r, g, b = image_obj.getpixel((x, y))
+        return (r + g + b) / 3 > 127
+    except Exception:
+        return False
 
 
 def display_art(spotify):
@@ -85,57 +89,65 @@ def display_art(spotify):
 
     current_track_name = None
     while True:
-        current_track = get_current_track(spotify)
+        try:
+            current_track = get_current_track(spotify)
 
-        if current_track is None:
-            current_track_name = None
-            root.update()
-            time.sleep(config['poll_interval_sleep'])
-            continue
+            if current_track is None:
+                current_track_name = None
+                root.update()
+                time.sleep(config['poll_interval_sleep'])
+                continue
 
-        if current_track['track_name'] != current_track_name:
-            current_track_name = current_track['track_name']
+            if current_track['track_name'] != current_track_name:
+                current_track_name = current_track['track_name']
 
-            # create iamge
-            image_obj = get_photo_image(
-                src=current_track['album_art_uri'],
-                width=dims['display_height'],
-                height=dims['display_height']
-            )
-            canvas.create_image((dims['display_width'] / 2) - (dims['display_height'] / 2), 0,
-                                image=image_obj['photo_image'],
-                                anchor='nw')
+                # create iamge
+                image_obj = get_photo_image(
+                    src=current_track['album_art_uri'],
+                    width=dims['display_height'],
+                    height=dims['display_height']
+                )
+                canvas.create_image((dims['display_width'] / 2) - (dims['display_height'] / 2), 0,
+                                    image=image_obj['photo_image'],
+                                    anchor='nw')
 
-            # create text for track
-            r, g, b = image_obj['image'].getpixel((3, dims['display_height'] - 50))
-            canvas.create_text((dims['display_width'] / 2 - dims['display_height'] / 2), dims['display_height'] - 50,
-                               text=current_track_name,
-                               fill=colors['track_dark'] if is_color_bright(r, g, b) else colors['track_light'],
-                               font=(fonts['font_family'], fonts['track'], 'bold'),
-                               angle=90,
-                               anchor='nw'
-                               )
+                track_bright = is_color_bright(image_obj['image'],
+                                               3,
+                                               dims['display_height'] - 50)
+                artist_bright = is_color_bright(image_obj['image'],
+                                                dims['display_height'] - 135,
+                                                dims['display_height'] - 3)
 
-            # create text for artist
-            r, g, b = image_obj['image'].getpixel((dims['display_height'] - 135, dims['display_height'] - 3))
-            canvas.create_text(dims['display_width'] / 2 + dims['display_height'] / 2 - 135, dims['display_height'],
-                               text=current_track['artist'],
-                               fill=colors['artist_dark'] if is_color_bright(r, g, b) else colors['artist_light'],
-                               font=(fonts['font_family'], fonts['artist'], 'bold'),
-                               anchor='se'
-                               )
+                # create text for track
+                canvas.create_text((dims['display_width'] / 2 - dims['display_height'] / 2), dims['display_height'] - 50,
+                                   text=current_track_name,
+                                   fill=colors['track_dark'] if track_bright else colors['track_light'],
+                                   font=(fonts['font_family'], fonts['track'], 'bold'),
+                                   angle=90,
+                                   anchor='nw'
+                                   )
 
-            # create text for release date
-            r, g, b = image_obj['image'].getpixel((dims['display_height'] - 45, dims['display_height'] - 8))
-            canvas.create_text(dims['display_width'] / 2 + dims['display_height'] / 2 - 45, dims['display_height'],
-                               text=current_track['release_date'],
-                               fill=colors['track_dark'] if is_color_bright(r, g, b) else colors['track_light'],
-                               font=(fonts['font_family'], fonts['release_date']),
-                               anchor='se'
-                               )
+                # create text for artist
+                canvas.create_text(dims['display_width'] / 2 + dims['display_height'] / 2 - 135, dims['display_height'],
+                                   text=current_track['artist'],
+                                   fill=colors['artist_dark'] if artist_bright else colors['artist_light'],
+                                   font=(fonts['font_family'], fonts['artist'], 'bold'),
+                                   anchor='se'
+                                   )
 
-            canvas.update()
+                # create text for release date
+                canvas.create_text(dims['display_width'] / 2 + dims['display_height'] / 2 - 45, dims['display_height'],
+                                   text=current_track['release_date'],
+                                   fill=colors['track_dark'] if artist_bright else colors['track_light'],
+                                   font=(fonts['font_family'], fonts['release_date']),
+                                   anchor='se'
+                                   )
+
+                canvas.update()
+                canvas.delete("all")
+        except Exception:
             canvas.delete("all")
+            canvas.update()
 
         time.sleep(config['poll_interval'])
 
