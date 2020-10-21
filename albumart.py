@@ -60,11 +60,8 @@ def get_current_track(spotify):
 def get_photo_image(src, width, height):
     res = requests.get(src)
     image = Image.open(BytesIO(res.content)).resize((width, height), Image.ANTIALIAS).convert('RGB')
-    photo_image = ImageTk.PhotoImage(image, size=())
-    return {
-        'image': image,
-        'photo_image': photo_image
-    }
+    image = image.point(lambda p: p*0.7)
+    return image
 
 
 def is_color_bright(image_obj, x, y):
@@ -73,7 +70,6 @@ def is_color_bright(image_obj, x, y):
         return (r + g + b) / 3 > 127
     except Exception:
         return False
-
 
 def display_art(spotify):
     root = Tk()
@@ -88,6 +84,7 @@ def display_art(spotify):
     canvas.pack(fill=BOTH, expand=True)
 
     current_track_name = None
+    prev_image = None
     while True:
         try:
             current_track = get_current_track(spotify)
@@ -102,19 +99,36 @@ def display_art(spotify):
                 current_track_name = current_track['track_name']
 
                 # create iamge
-                image_obj = get_photo_image(
+                album_art = get_photo_image(
                     src=current_track['album_art_uri'],
                     width=dims['display_height'],
                     height=dims['display_height']
                 )
-                canvas.create_image((dims['display_width'] / 2) - (dims['display_height'] / 2), 0,
-                                    image=image_obj['photo_image'],
-                                    anchor='nw')
 
-                track_bright = is_color_bright(image_obj['image'],
+                # fade transition if prev image is existing
+                if prev_image is not None:
+                    alpha = 0
+                    while 1.0 > alpha:
+                        new_img = Image.blend(prev_image, album_art, alpha)
+                        alpha = alpha + 0.01
+                        # time.sleep(0.001)
+                        tk_image = ImageTk.PhotoImage(new_img)
+                        canvas.create_image((dims['display_width'] / 2) - (dims['display_height'] / 2), 0,
+                                            image=tk_image,
+                                            anchor='nw')
+                        canvas.update()
+                else:
+                    tk_image = ImageTk.PhotoImage(album_art)
+                    canvas.create_image((dims['display_width'] / 2) - (dims['display_height'] / 2), 0,
+                                        image=tk_image,
+                                        anchor='nw')
+
+                prev_image = album_art
+
+                track_bright = is_color_bright(album_art,
                                                3,
                                                dims['display_height'] - 50)
-                artist_bright = is_color_bright(image_obj['image'],
+                artist_bright = is_color_bright(album_art,
                                                 dims['display_height'] - 135,
                                                 dims['display_height'] - 3)
 
@@ -128,7 +142,7 @@ def display_art(spotify):
                                    )
 
                 # create text for artist
-                canvas.create_text(dims['display_width'] / 2 + dims['display_height'] / 2 - 135, dims['display_height'],
+                canvas.create_text(dims['display_width'] / 2 + dims['display_height'] / 2 - 155, dims['display_height'],
                                    text=current_track['artist'],
                                    fill=colors['artist_dark'] if artist_bright else colors['artist_light'],
                                    font=(fonts['font_family'], fonts['artist'], 'bold'),
