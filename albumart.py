@@ -110,8 +110,7 @@ def display_art(spotify):
                     alpha = 0
                     while 1.0 > alpha:
                         new_img = Image.blend(prev_image, album_art, alpha)
-                        alpha = alpha + 0.01
-                        # time.sleep(0.001)
+                        alpha = alpha + 0.02
                         tk_image = ImageTk.PhotoImage(new_img)
                         canvas.create_image((dims['display_width'] / 2) - (dims['display_height'] / 2), 0,
                                             image=tk_image,
@@ -125,36 +124,37 @@ def display_art(spotify):
 
                 prev_image = album_art
 
-                track_bright = is_color_bright(album_art,
+                artist_bright = is_color_bright(album_art,
                                                3,
                                                dims['display_height'] - 50)
-                artist_bright = is_color_bright(album_art,
-                                                dims['display_height'] - 135,
-                                                dims['display_height'] - 3)
+                track_bright = is_color_bright(album_art,
+                                               dims['display_width'] / 2 - dims['display_height'] / 2 - 135,
+                                               dims['display_height'] - 3)
 
                 # create text for track
-                canvas.create_text((dims['display_width'] / 2 - dims['display_height'] / 2), dims['display_height'] - 50,
+                canvas.create_text(dims['display_width'] / 2 + dims['display_height'] / 2 - 45, dims['display_height'],
                                    text=current_track_name,
                                    fill=colors['track_dark'] if track_bright else colors['track_light'],
                                    font=(fonts['font_family'], fonts['track'], 'bold'),
+                                   anchor='se'
+                                   )
+
+                # create text for artist
+                canvas.create_text(dims['display_width'] / 2 - dims['display_height'] / 2, dims['display_height'] - 130,
+                                   text=current_track['artist'],
+                                   fill=colors['artist_dark'] if artist_bright else colors['artist_light'],
+                                   font=(fonts['font_family'], fonts['artist'], 'bold'),
                                    angle=90,
                                    anchor='nw'
                                    )
 
-                # create text for artist
-                canvas.create_text(dims['display_width'] / 2 + dims['display_height'] / 2 - 155, dims['display_height'],
-                                   text=current_track['artist'],
-                                   fill=colors['artist_dark'] if artist_bright else colors['artist_light'],
-                                   font=(fonts['font_family'], fonts['artist'], 'bold'),
-                                   anchor='se'
-                                   )
-
                 # create text for release date
-                canvas.create_text(dims['display_width'] / 2 + dims['display_height'] / 2 - 45, dims['display_height'],
+                canvas.create_text(dims['display_width'] / 2 - dims['display_height'] / 2, dims['display_height'] - 50,
                                    text=current_track['release_date'],
                                    fill=colors['track_dark'] if artist_bright else colors['track_light'],
                                    font=(fonts['font_family'], fonts['release_date']),
-                                   anchor='se'
+                                   angle=90,
+                                   anchor='nw'
                                    )
 
                 canvas.update()
