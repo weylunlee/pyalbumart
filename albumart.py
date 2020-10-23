@@ -77,7 +77,6 @@ class AlbumArt:
     def get_photo_image(src, width, height):
         res = requests.get(src)
         image = Image.open(BytesIO(res.content)).resize((width, height), Image.ANTIALIAS).convert('RGB')
-        image = image.point(lambda p: p * 0.7)
         return image
 
     @staticmethod
@@ -132,15 +131,15 @@ class AlbumArt:
                         alpha += 0.01
                         tk_image = ImageTk.PhotoImage(new_img)
                         AlbumArt.canvas.create_image(
-                            (AlbumArt.dims['display_width'] / 2) - (AlbumArt.dims['display_height'] / 2), 0,
+                            0, 0,
                             image=tk_image,
                             anchor='nw')
                         AlbumArt.canvas.update()
-                        AlbumArt.canvas.after(20)
+                        #AlbumArt.canvas.after(3)
 
                 AlbumArt.tk_image = ImageTk.PhotoImage(album_art)
                 AlbumArt.canvas.create_image(
-                    (AlbumArt.dims['display_width'] / 2) - (AlbumArt.dims['display_height'] / 2), 0,
+                    0, 0,
                     image=AlbumArt.tk_image,
                     anchor='nw')
 
@@ -169,7 +168,7 @@ class AlbumArt:
                 # create text for artist
                 AlbumArt.canvas.create_text(
                     AlbumArt.dims['display_width'] / 2 - AlbumArt.dims['display_height'] / 2,
-                    AlbumArt.dims['display_height'] - 130,
+                    AlbumArt.dims['display_height'] - 155,
                     text=current_track['artist'],
                     fill=AlbumArt.colors['artist_dark'] if artist_bright else AlbumArt.colors[
                         'artist_light'],
