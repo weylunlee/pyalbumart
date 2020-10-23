@@ -52,6 +52,7 @@ class AlbumArt:
 
     @staticmethod
     def get_current_track():
+        print('spotify::get_track')
         track = AlbumArt.spotify.current_user_playing_track()
 
         artist_text = ''
@@ -135,7 +136,6 @@ class AlbumArt:
                             image=tk_image,
                             anchor='nw')
                         AlbumArt.canvas.update()
-                        #AlbumArt.canvas.after(3)
 
                 AlbumArt.tk_image = ImageTk.PhotoImage(album_art)
                 AlbumArt.canvas.create_image(
@@ -147,45 +147,45 @@ class AlbumArt:
 
                 artist_bright = AlbumArt.is_color_bright(
                     album_art,
-                    3,
+                    AlbumArt.dims['display_width'] - 3,
                     AlbumArt.dims['display_height'] - 50)
+
                 track_bright = AlbumArt.is_color_bright(
                     album_art,
-                    AlbumArt.dims['display_width'] / 2 - AlbumArt.dims[
-                        'display_height'] / 2 - 135,
+                    40,
                     AlbumArt.dims['display_height'] - 3)
 
                 # create text for track
                 AlbumArt.canvas.create_text(
-                    AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2 - 45,
+                    AlbumArt.dims['display_width'] / 2 - AlbumArt.dims['display_height'] / 2 + 40,
                     AlbumArt.dims['display_height'],
                     text=AlbumArt.current_track_name,
                     fill=AlbumArt.colors['track_dark'] if track_bright else AlbumArt.colors['track_light'],
                     font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['track'], 'bold'),
-                    anchor='se'
+                    anchor='sw'
                 )
 
                 # create text for artist
                 AlbumArt.canvas.create_text(
-                    AlbumArt.dims['display_width'] / 2 - AlbumArt.dims['display_height'] / 2,
+                    AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2,
                     AlbumArt.dims['display_height'] - 155,
                     text=current_track['artist'],
                     fill=AlbumArt.colors['artist_dark'] if artist_bright else AlbumArt.colors[
                         'artist_light'],
                     font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['artist'], 'bold'),
-                    angle=90,
-                    anchor='nw'
+                    angle=270,
+                    anchor='ne'
                 )
 
                 # create text for release date
                 AlbumArt.canvas.create_text(
-                    AlbumArt.dims['display_width'] / 2 - AlbumArt.dims['display_height'] / 2,
+                    AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2,
                     AlbumArt.dims['display_height'] - 50,
                     text=current_track['release_date'],
                     fill=AlbumArt.colors['track_dark'] if artist_bright else AlbumArt.colors['track_light'],
                     font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['release_date']),
-                    angle=90,
-                    anchor='nw'
+                    angle=270,
+                    anchor='ne'
                 )
 
                 AlbumArt.canvas.update()
