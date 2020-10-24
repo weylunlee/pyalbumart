@@ -168,7 +168,7 @@ class AlbumArt:
                 # create text for artist
                 AlbumArt.canvas.create_text(
                     AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2,
-                    AlbumArt.dims['display_height'] - 155,
+                    AlbumArt.dims['display_height'] - 150,
                     text=current_track['artist'],
                     fill=AlbumArt.colors['artist_dark'] if artist_bright else AlbumArt.colors[
                         'artist_light'],
@@ -180,10 +180,10 @@ class AlbumArt:
                 # create text for release date
                 AlbumArt.canvas.create_text(
                     AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2,
-                    AlbumArt.dims['display_height'] - 50,
+                    AlbumArt.dims['display_height'] - 45,
                     text=current_track['release_date'],
                     fill=AlbumArt.colors['track_dark'] if artist_bright else AlbumArt.colors['track_light'],
-                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['release_date']),
+                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['release_date'], 'bold'),
                     angle=270,
                     anchor='ne'
                 )
