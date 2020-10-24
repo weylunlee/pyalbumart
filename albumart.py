@@ -138,6 +138,7 @@ class AlbumArt:
                         AlbumArt.canvas.update()
 
                 AlbumArt.tk_image = ImageTk.PhotoImage(album_art)
+                # c = AlbumArt.tk_image.getcolors()
                 AlbumArt.canvas.create_image(
                     0, 0,
                     image=AlbumArt.tk_image,
@@ -157,35 +158,61 @@ class AlbumArt:
 
                 # create text for track
                 AlbumArt.canvas.create_text(
+                    AlbumArt.dims['display_width'] / 2 - AlbumArt.dims['display_height'] / 2 + 41,
+                    AlbumArt.dims['display_height'] + 1,
+                    text=AlbumArt.current_track_name,
+                    fill='#ffffff' if artist_bright else '#000000',
+                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['track']),
+                    anchor='sw'
+                )
+                AlbumArt.canvas.create_text(
                     AlbumArt.dims['display_width'] / 2 - AlbumArt.dims['display_height'] / 2 + 40,
                     AlbumArt.dims['display_height'],
                     text=AlbumArt.current_track_name,
                     fill=AlbumArt.colors['track_dark'] if track_bright else AlbumArt.colors['track_light'],
-                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['track'], 'bold'),
+                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['track']),
                     anchor='sw'
                 )
 
                 # create text for artist
+                AlbumArt.canvas.create_text(
+                    AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2 + 1,
+                    AlbumArt.dims['display_height'] - 149,
+                    text=current_track['artist'],
+                    fill='#ffffff' if artist_bright else '#000000',
+                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['artist']),
+                    angle=270,
+                    anchor='ne'
+                )
                 AlbumArt.canvas.create_text(
                     AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2,
                     AlbumArt.dims['display_height'] - 150,
                     text=current_track['artist'],
                     fill=AlbumArt.colors['artist_dark'] if artist_bright else AlbumArt.colors[
                         'artist_light'],
-                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['artist'], 'bold'),
+                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['artist']),
                     angle=270,
                     anchor='ne'
                 )
 
                 # create text for release date
                 AlbumArt.canvas.create_text(
+                    AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2 + 1,
+                    AlbumArt.dims['display_height'] - 129,
+                    text=current_track['release_date'],
+                    fill='#ffffff' if artist_bright else '#000000',
+                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['release_date']),
+                    angle=270,
+                    anchor='nw'
+                )
+                AlbumArt.canvas.create_text(
                     AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2,
-                    AlbumArt.dims['display_height'] - 45,
+                    AlbumArt.dims['display_height'] - 130,
                     text=current_track['release_date'],
                     fill=AlbumArt.colors['track_dark'] if artist_bright else AlbumArt.colors['track_light'],
-                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['release_date'], 'bold'),
+                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['release_date']),
                     angle=270,
-                    anchor='ne'
+                    anchor='nw'
                 )
 
                 AlbumArt.canvas.update()
