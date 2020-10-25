@@ -5,8 +5,11 @@ from tkinter import Tk, Canvas, BOTH
 import requests
 import spotipy
 import yaml
-from PIL import Image, ImageTk
+from PIL import Image
+from colorthief import ColorThief
 from spotipy.oauth2 import SpotifyOAuth
+
+from gui import ImageLabel, TextLabel
 
 
 class AlbumArt:
@@ -20,10 +23,12 @@ class AlbumArt:
 
     root = None
     canvas = None
+    album_art_label = None
+    track_label = None
+    artist_label = None
+    release_date_label = None
 
     current_track_name = None
-    prev_image = None
-    tk_image = None
 
     @staticmethod
     def load_config():
@@ -78,6 +83,14 @@ class AlbumArt:
     def get_photo_image(src, width, height):
         res = requests.get(src)
         image = Image.open(BytesIO(res.content)).resize((width, height), Image.ANTIALIAS).convert('RGB')
+
+        color_thief = ColorThief(os.getcwd() + '/image.png')
+        color_thief.image = image
+        # get the dominant color
+        dominant_color = color_thief.get_color(quality=1)
+        # build a color palette
+        palette = color_thief.get_palette(color_count=3)
+
         return image
 
     @staticmethod
@@ -89,17 +102,37 @@ class AlbumArt:
             return False
 
     @staticmethod
-    def init_canvas():
+    def init_gui_components():
         AlbumArt.root = Tk()
         AlbumArt.root.configure(bg=AlbumArt.colors['background'], cursor='none')
         AlbumArt.root.attributes('-fullscreen', True)
         AlbumArt.canvas = Canvas(AlbumArt.root,
-                                 width=AlbumArt.dims['display_width'],
-                                 height=AlbumArt.dims['display_height'],
+                                 width=AlbumArt.dims['width'],
+                                 height=AlbumArt.dims['width'],
                                  bg=AlbumArt.colors['background'],
                                  bd=0,
                                  highlightthickness=0)
         AlbumArt.canvas.pack(fill=BOTH, expand=True)
+
+        AlbumArt.album_art_label = ImageLabel(AlbumArt.canvas)
+
+        AlbumArt.track_label = TextLabel(AlbumArt.canvas,
+                                         40,
+                                         AlbumArt.dims['width'],
+                                         'sw', 0,
+                                         AlbumArt.fonts['font_family'], AlbumArt.fonts['track'])
+
+        AlbumArt.artist_label = TextLabel(AlbumArt.canvas,
+                                          AlbumArt.dims['width'],
+                                          AlbumArt.dims['width'] - 150,
+                                          'ne', 270,
+                                          AlbumArt.fonts['font_family'], AlbumArt.fonts['track'])
+
+        AlbumArt.release_date_label = TextLabel(AlbumArt.canvas,
+                                                AlbumArt.dims['width'],
+                                                AlbumArt.dims['width'] - 130,
+                                                'nw', 270,
+                                                AlbumArt.fonts['font_family'], AlbumArt.fonts['track'])
 
     @staticmethod
     def display_art():
@@ -120,100 +153,16 @@ class AlbumArt:
                 # create image
                 album_art = AlbumArt.get_photo_image(
                     src=current_track['album_art_uri'],
-                    width=AlbumArt.dims['display_height'],
-                    height=AlbumArt.dims['display_height']
+                    width=AlbumArt.dims['width'],
+                    height=AlbumArt.dims['width']
                 )
 
-                # fade transition if prev image is exists
-                if AlbumArt.prev_image is not None:
-                    alpha = 0
-                    while 1.0 > alpha:
-                        new_img = Image.blend(AlbumArt.prev_image, album_art, alpha)
-                        alpha += 0.01
-                        tk_image = ImageTk.PhotoImage(new_img)
-                        AlbumArt.canvas.create_image(
-                            0, 0,
-                            image=tk_image,
-                            anchor='nw')
-                        AlbumArt.canvas.update()
+                AlbumArt.album_art_label.show(album_art)
 
-                AlbumArt.tk_image = ImageTk.PhotoImage(album_art)
-                # c = AlbumArt.tk_image.getcolors()
-                AlbumArt.canvas.create_image(
-                    0, 0,
-                    image=AlbumArt.tk_image,
-                    anchor='nw')
-
-                AlbumArt.prev_image = album_art
-
-                artist_bright = AlbumArt.is_color_bright(
-                    album_art,
-                    AlbumArt.dims['display_width'] - 3,
-                    AlbumArt.dims['display_height'] - 50)
-
-                track_bright = AlbumArt.is_color_bright(
-                    album_art,
-                    40,
-                    AlbumArt.dims['display_height'] - 3)
-
-                # create text for track
-                AlbumArt.canvas.create_text(
-                    AlbumArt.dims['display_width'] / 2 - AlbumArt.dims['display_height'] / 2 + 41,
-                    AlbumArt.dims['display_height'] + 1,
-                    text=AlbumArt.current_track_name,
-                    fill='#ffffff' if artist_bright else '#000000',
-                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['track']),
-                    anchor='sw'
-                )
-                AlbumArt.canvas.create_text(
-                    AlbumArt.dims['display_width'] / 2 - AlbumArt.dims['display_height'] / 2 + 40,
-                    AlbumArt.dims['display_height'],
-                    text=AlbumArt.current_track_name,
-                    fill=AlbumArt.colors['track_dark'] if track_bright else AlbumArt.colors['track_light'],
-                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['track']),
-                    anchor='sw'
-                )
-
-                # create text for artist
-                AlbumArt.canvas.create_text(
-                    AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2 + 1,
-                    AlbumArt.dims['display_height'] - 149,
-                    text=current_track['artist'],
-                    fill='#ffffff' if artist_bright else '#000000',
-                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['artist']),
-                    angle=270,
-                    anchor='ne'
-                )
-                AlbumArt.canvas.create_text(
-                    AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2,
-                    AlbumArt.dims['display_height'] - 150,
-                    text=current_track['artist'],
-                    fill=AlbumArt.colors['artist_dark'] if artist_bright else AlbumArt.colors[
-                        'artist_light'],
-                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['artist']),
-                    angle=270,
-                    anchor='ne'
-                )
-
-                # create text for release date
-                AlbumArt.canvas.create_text(
-                    AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2 + 1,
-                    AlbumArt.dims['display_height'] - 129,
-                    text=current_track['release_date'],
-                    fill='#ffffff' if artist_bright else '#000000',
-                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['release_date']),
-                    angle=270,
-                    anchor='nw'
-                )
-                AlbumArt.canvas.create_text(
-                    AlbumArt.dims['display_width'] / 2 + AlbumArt.dims['display_height'] / 2,
-                    AlbumArt.dims['display_height'] - 130,
-                    text=current_track['release_date'],
-                    fill=AlbumArt.colors['track_dark'] if artist_bright else AlbumArt.colors['track_light'],
-                    font=(AlbumArt.fonts['font_family'], AlbumArt.fonts['release_date']),
-                    angle=270,
-                    anchor='nw'
-                )
+                # set the text labels
+                AlbumArt.track_label.show(AlbumArt.current_track_name, None)
+                AlbumArt.artist_label.show(current_track['artist'], None)
+                AlbumArt.release_date_label.show(current_track['release_date'], None)
 
                 AlbumArt.canvas.update()
         except Exception:
@@ -229,7 +178,7 @@ class AlbumArt:
 
         # init spotify and tk
         AlbumArt.create_spotify_obj()
-        AlbumArt.init_canvas()
+        AlbumArt.init_gui_components()
 
 
 if __name__ == '__main__':

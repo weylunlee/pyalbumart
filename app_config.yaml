@@ -5,25 +5,15 @@ credentials:
   scope: 'user-read-private user-read-playback-state user-modify-playback-state'
   uri: 'http://127.0.0.1:443'
 
-# assumes display is either horizontal or square
+# assumes display is square
 dimensions:
-# dell
-#  display_width: 2560
-#  display_height: 1440
-
-# mac book
-#  display_width: 1010
-#  display_height: 1010
-
-# raspberry pi
-  display_width: 720
-  display_height: 720
+  width: 720
 
 fonts:
-  font_family: 'Courier New'
-  track: 14
-  artist: 14
-  release_date: 13
+  font_family: 'Quicksand'
+  track: 22
+  artist: 22
+  release_date: 22
 
 colors:
   track_light: '#dac5a4'
