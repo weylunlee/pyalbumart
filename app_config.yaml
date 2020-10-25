@@ -20,7 +20,7 @@ colors:
   track_dark: '#45413b'
   artist_light: '#dc9609'
   artist_dark: '#9e6a03'
-  background: 'black'
 
-poll_interval: 5
-poll_interval_sleep: 25
+timings:
+  poll_interval: 5
+  poll_interval_sleep: 25

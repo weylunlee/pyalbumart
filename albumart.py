@@ -6,7 +6,6 @@ import requests
 import spotipy
 import yaml
 from PIL import Image
-from colorthief import ColorThief
 from spotipy.oauth2 import SpotifyOAuth
 
 from gui import ImageLabel, TextLabel
@@ -17,6 +16,7 @@ class AlbumArt:
     dims = None
     colors = None
     fonts = None
+    timings = None
 
     credentials = None
     spotify = None
@@ -45,6 +45,7 @@ class AlbumArt:
             AlbumArt.dims = AlbumArt.config['dimensions']
             AlbumArt.colors = AlbumArt.config['colors']
             AlbumArt.fonts = AlbumArt.config['fonts']
+            AlbumArt.timings = AlbumArt.config['timings']
 
     @staticmethod
     def create_spotify_obj():
@@ -83,14 +84,6 @@ class AlbumArt:
     def get_photo_image(src, width, height):
         res = requests.get(src)
         image = Image.open(BytesIO(res.content)).resize((width, height), Image.ANTIALIAS).convert('RGB')
-
-        color_thief = ColorThief(os.getcwd() + '/image.png')
-        color_thief.image = image
-        # get the dominant color
-        dominant_color = color_thief.get_color(quality=1)
-        # build a color palette
-        palette = color_thief.get_palette(color_count=3)
-
         return image
 
     @staticmethod
@@ -104,12 +97,12 @@ class AlbumArt:
     @staticmethod
     def init_gui_components():
         AlbumArt.root = Tk()
-        AlbumArt.root.configure(bg=AlbumArt.colors['background'], cursor='none')
+        AlbumArt.root.configure(bg='black', cursor='none')
         AlbumArt.root.attributes('-fullscreen', True)
         AlbumArt.canvas = Canvas(AlbumArt.root,
                                  width=AlbumArt.dims['width'],
                                  height=AlbumArt.dims['width'],
-                                 bg=AlbumArt.colors['background'],
+                                 bg='black',
                                  bd=0,
                                  highlightthickness=0)
         AlbumArt.canvas.pack(fill=BOTH, expand=True)
@@ -144,7 +137,7 @@ class AlbumArt:
                 AlbumArt.current_track_name = None
 
                 AlbumArt.canvas.update()
-                AlbumArt.canvas.wait(AlbumArt.config['poll_interval_sleep'] * 1000)
+                AlbumArt.canvas.wait(AlbumArt.timings['poll_interval_sleep'] * 1000)
             elif current_track['track_name'] != AlbumArt.current_track_name:
                 AlbumArt.canvas.delete("all")
 
@@ -169,7 +162,7 @@ class AlbumArt:
             AlbumArt.canvas.delete("all")
             AlbumArt.canvas.update()
 
-        AlbumArt.canvas.after(AlbumArt.config['poll_interval'] * 1000, AlbumArt.display_art)
+        AlbumArt.canvas.after(AlbumArt.timings['poll_interval'] * 1000, AlbumArt.display_art)
 
     @staticmethod
     def init():
