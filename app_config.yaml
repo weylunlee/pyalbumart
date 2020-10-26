@@ -11,16 +11,16 @@ dimensions:
 
 fonts:
   font_family: 'Quicksand'
-  track: 22
-  artist: 22
-  release_date: 22
-
-colors:
-  track_light: '#dac5a4'
-  track_dark: '#45413b'
-  artist_light: '#dc9609'
-  artist_dark: '#9e6a03'
+  track: 20
+  artist: 20
+  release_date: 20
 
 timings:
   poll_interval: 5
   poll_interval_sleep: 25
+
+palette:
+  count: 8
+  track_offset: 0
+  artist_offset: 2
+  release_date_offset: 3

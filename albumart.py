@@ -44,7 +44,8 @@ class AlbumArt:
         AlbumArt.gui = Gui(spotify,
                            AlbumArt.config['dimensions'],
                            AlbumArt.config['fonts'],
-                           AlbumArt.config['timings'])
+                           AlbumArt.config['timings'],
+                           AlbumArt.config['palette'])
 
 
 if __name__ == '__main__':

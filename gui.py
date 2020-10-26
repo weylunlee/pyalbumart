@@ -1,6 +1,7 @@
 from io import BytesIO
 from tkinter import Tk, Canvas, BOTH
 
+import colorgram
 import requests
 from PIL import Image
 
@@ -8,7 +9,7 @@ from gui_components import TextLabel, ImageLabel
 
 
 class Gui:
-    def __init__(self, spotify, dims, fonts, timings):
+    def __init__(self, spotify, dims, fonts, timings, palette):
         self.root = Tk()
         self.root.configure(bg='black', cursor='none')
         self.root.attributes('-fullscreen', True)
@@ -32,17 +33,18 @@ class Gui:
                                       dims['width'],
                                       dims['width'] - 150,
                                       'ne', 270,
-                                      fonts['font_family'], fonts['track'])
+                                      fonts['font_family'], fonts['artist'])
 
         self.release_date_label = TextLabel(self.canvas,
                                             dims['width'],
                                             dims['width'] - 130,
                                             'nw', 270,
-                                            fonts['font_family'], fonts['track'])
+                                            fonts['font_family'], fonts['release_date'])
 
         self.spotify = spotify
         self.dims = dims
         self.timings = timings
+        self.palette = palette
         self.current_track_name = None
 
     def update(self):
@@ -70,10 +72,14 @@ class Gui:
                 # set the image label
                 self.album_art_label.show(album_art)
 
+                # get the color palette of the image for text labels
+                colors = Gui.get_image_palette(album_art, self.palette['count'])
+
                 # set the text labels
-                self.track_label.show(self.current_track_name, None)
-                self.artist_label.show(current_track['artist'], None)
-                self.release_date_label.show(current_track['release_date'], None)
+                self.track_label.show(self.current_track_name, album_art, colors, self.palette['track_offset'])
+                self.artist_label.show(current_track['artist'], album_art, colors, self.palette['artist_offset'])
+                self.release_date_label.show(current_track['release_date'], album_art, colors,
+                                             self.palette['release_date_offset'])
 
                 self.canvas.update()
         except Exception:
@@ -109,15 +115,13 @@ class Gui:
         self.root.mainloop()
 
     @staticmethod
-    def is_color_bright(image_obj, x, y):
-        try:
-            r, g, b = image_obj.getpixel((x, y))
-            return (r + g + b) / 3 > 127
-        except Exception:
-            return False
-
-    @staticmethod
     def get_photo_image(src, width, height):
         res = requests.get(src)
         image = Image.open(BytesIO(res.content)).resize((width, height), Image.ANTIALIAS).convert('RGB')
         return image
+
+    @staticmethod
+    def get_image_palette(image, count):
+        colors = colorgram.extract(image, count)
+        colors.sort(key=lambda c: c.hsl.l)
+        return colors
