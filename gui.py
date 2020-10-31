@@ -69,11 +69,14 @@ class Gui:
                     height=self.dims['width']
                 )
 
+                # create thumbnail
+                thumbnail = self.get_photo_image(src=current_track['thumbnail'], width=None, height=None)
+
                 # set the image label
                 self.album_art_label.show(album_art)
 
                 # get the color palette of the image for text labels
-                colors = Gui.get_image_palette(album_art, self.palette['count'])
+                colors = Gui.get_image_palette(thumbnail, self.palette['count'])
 
                 # set the text labels
                 self.track_label.show(self.current_track_name, album_art, colors, self.palette['track_offset'])
@@ -92,9 +95,9 @@ class Gui:
         print('spotify::get_track')
         track = self.spotify.current_user_playing_track()
 
-        artist_text = ''
         if track is None:
             return None
+        artist_text = ''
 
         item = track['item']
 
@@ -108,6 +111,7 @@ class Gui:
             'track_name': item['name'],
             'artist': artist_text,
             'album_art_uri': item['album']['images'][0]['url'],
+            'thumbnail': item['album']['images'][2]['url'],
             'release_date': item['album']['release_date'][0:7]
         }
 
@@ -117,7 +121,10 @@ class Gui:
     @staticmethod
     def get_photo_image(src, width, height):
         res = requests.get(src)
-        image = Image.open(BytesIO(res.content)).resize((width, height), Image.ANTIALIAS).convert('RGB')
+        image = Image.open(BytesIO(res.content)).convert('RGB')
+        if width is not None:
+            image = image.resize((width, height), Image.ANTIALIAS)
+            print('resized')
         return image
 
     @staticmethod
