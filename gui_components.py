@@ -13,8 +13,8 @@ class TextLabel:
         self.font_size = font_size
 
     def show(self, text, image, colors, palette_offset):
-        sample_x_offset = 5 if self.anchor[1:2] == 'w' else -5
-        sample_y_offset = 5 if self.anchor[0:1] == 'n' else -5
+        sample_x_offset = -5 if self.anchor[1:2] == 'w' else -5
+        sample_y_offset = -5 if self.anchor[0:1] == 'n' else -5
 
         is_color_bright = TextLabel.is_color_bright(image, self.x + sample_x_offset, self.y + sample_y_offset)
 
@@ -23,7 +23,7 @@ class TextLabel:
             self.y+1,
             text=text,
             fill='#ffffff' if is_color_bright else '#000000',
-            font=(self.font_family, self.font_size),
+            font=(self.font_family, self.font_size, 'bold'),
             anchor=self.anchor,
             angle=self.angle
         )
@@ -36,7 +36,7 @@ class TextLabel:
             self.y,
             text=text,
             fill=color_hex,
-            font=(self.font_family, self.font_size),
+            font=(self.font_family, self.font_size, 'bold'),
             anchor=self.anchor,
             angle=self.angle
         )
@@ -45,7 +45,7 @@ class TextLabel:
     def is_color_bright(image, x, y):
         try:
             r, g, b = image.getpixel((x, y))
-            return (r + g + b) / 3 > 127
+            return (r + g + b) / 3 > 175
         except Exception:
             return False
 
@@ -63,7 +63,7 @@ class ImageLabel:
             alpha = 0
             while 1.0 > alpha:
                 new_img = Image.blend(self.prev_image, image, alpha)
-                alpha += 0.01
+                alpha += 0.02
                 tk_image = ImageTk.PhotoImage(new_img)
                 self.canvas.create_image(0, 0, image=tk_image, anchor='nw')
                 self.canvas.update()

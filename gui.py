@@ -123,5 +123,5 @@ class Gui:
     @staticmethod
     def get_image_palette(image, count):
         colors = colorgram.extract(image, count)
-        colors.sort(key=lambda c: c.hsl.l)
+        colors.sort(key=lambda c: c.rgb.r+c.rgb.g+c.rgb.b)
         return colors

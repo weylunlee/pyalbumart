@@ -11,8 +11,8 @@ dimensions:
 
 fonts:
   font_family: 'Quicksand'
-  track: 20
-  artist: 20
+  track: 22
+  artist: 22
   release_date: 20
 
 timings:
@@ -20,7 +20,7 @@ timings:
   poll_interval_sleep: 25
 
 palette:
-  count: 8
+  count: 6
   track_offset: 0
   artist_offset: 2
-  release_date_offset: 3
+  release_date_offset: 1
